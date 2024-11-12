@@ -16,8 +16,18 @@ class Failure(TypedDict):
     tool: str
 
 
-# using an access token
-auth = Auth.Token("access_token")
+GITHUB_HOSTNAME = (
+    os.environ.get("GITHUB_SERVER_URL", "github.com")
+    .replace("https://", "")
+    .replace("http://", "")
+)
+
+GITHUB_TOKEN = os.environ.get("INPUT_GITHUB_TOKEN")
+if not GITHUB_TOKEN:
+    msg = "github_token must be set"
+    raise ValueError(msg)
+auth = Auth.Token(GITHUB_TOKEN)
+#g = Github(auth=auth, base_url=f"https://{GITHUB_HOSTNAME}/api/v3")
 
 
 def create_annotation(file_path, start_line, end_line, title, message, level="warning",):
@@ -28,12 +38,9 @@ def create_annotation(file_path, start_line, end_line, title, message, level="wa
     )
 
 
-def process_checkov_results(results_file, github_token, hostname):
+def process_checkov_results(results_file):
     print(f"Processing Checkov results from {results_file}")
-    print(f"Using GitHub host: {hostname}")
-
-    g = Github(github_token, base_url=f"https://{hostname}/api/v3")
-
+    print(f"Using GitHub host: {GITHUB_HOSTNAME}")
     try:
         with open(results_file, 'r') as f:
             results = json.load(f)
@@ -84,13 +91,4 @@ def process_checkov_results(results_file, github_token, hostname):
         print(f"Created annotation in {file_path}:{start_line}-{end_line}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: process_results.py <github_token> <github_hostname>")
-        sys.exit(1)
-    github_token = sys.argv[1]
-    github_hostname = sys.argv[2]
-    process_checkov_results(
-        'checkov_output.json',
-        github_token,
-        github_hostname,
-    )
+    process_checkov_results('checkov_output.json')

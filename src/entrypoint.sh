@@ -2,24 +2,16 @@
 set -e
 
 # region Get inputs with defaults
-GITHUB_TOKEN="${1}"
-PATH_TO_SCAN="${2:-.}"
-FRAMEWORKS="${3:-terraform,terraform_plan}"
-SKIP_CHECKS="${4:-}"
-CHECKS="${5:-}"
-
-# Get GitHub hostname from environment, default to github.com
-GITHUB_HOST="${GITHUB_SERVER_URL:-https://github.com}"
-GITHUB_HOST="${GITHUB_HOST#https://}"
-GITHUB_HOST="${GITHUB_HOST#http://}"
-# endregion
+PATH_TO_SCAN="${INPUT_PATH:-.}"
+FRAMEWORKS="${INPUT_FRAMEWORK:-terraform,terraform_plan}"
+SKIP_CHECKS="${INPUT_SKIP_CHECK:-}"
+CHECKS="${INPUT_CHECK:-}"
 
 echo "Starting misconfiguration scan..."
 echo "Path to scan: $PATH_TO_SCAN"
 echo "Frameworks: $FRAMEWORKS"
 echo "Skip checks: $SKIP_CHECKS"
 echo "Specific checks: $CHECKS"
-echo "GitHub Host: $GITHUB_HOST"
 
 # region Prepare parameters
 FRAMEWORK_PARAM=""
@@ -59,7 +51,7 @@ if [ ! -s checkov_output.json ]; then
 fi
 
 echo "Processing results..."
-python process_results.py "$GITHUB_TOKEN" "$GITHUB_HOST"
+python process_results.py
 
 # Print summary of findings
 echo "Scan complete. See annotations in PR for details."
