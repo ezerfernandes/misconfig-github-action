@@ -1,6 +1,9 @@
 name: 'Misconfiguration Scanner'
 description: 'Scan for misconfigurations in Infrastructure as Code files'
 inputs:
+  github_token:
+    description: "GitHub token"
+    required: true
   path:
     description: 'Path to scan'
     required: false
@@ -26,3 +29,7 @@ runs:
     - ${{ inputs.framework }}
     - ${{ inputs.skip_check }}
     - ${{ inputs.check }}
+
+branding:
+  icon: "git-pull-request"
+  color: "orange"
