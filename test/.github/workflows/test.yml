@@ -9,8 +9,22 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Scan for misconfigurations
+        id: scan
         uses: ezerfernandes/misconfig-github-action@v1
         with:
           path: ./test
           framework: terraform,terraform_plan
           skip_check: CKV_AWS_21,CKV_AWS_178,CKV_AWS_195
+
+      - name: Show scan results
+        if: always()
+        run: |
+          echo "Scan completed with exit code ${{ steps.scan.outputs.exit_code }}"
+          if [ -f checkov_output.json ]; then
+            echo "Checkov output:"
+            cat checkov_output.json
+          fi
+          if [ -f checkov_error.txt ]; then
+            echo "Checkov errors:"
+            cat checkov_error.txt
+          fi
