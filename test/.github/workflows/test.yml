@@ -1,0 +1,16 @@
+name: Test Misconfiguration Scanner
+
+on: [pull_request]
+
+jobs:
+  test-scanner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for misconfigurations
+        uses: ezerfernandes/misconfig-github-action@v1
+        with:
+          path: ./test
+          framework: terraform,terraform_plan
+          skip_check: CKV_AWS_21,CKV_AWS_178,CKV_AWS_195
