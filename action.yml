@@ -1,0 +1,28 @@
+name: 'Misconfiguration Scanner'
+description: 'Scan for misconfigurations in Infrastructure as Code files'
+inputs:
+  path:
+    description: 'Path to scan'
+    required: false
+    default: '.'
+  framework:
+    description: 'Frameworks to scan (comma-separated)'
+    required: false
+    default: 'terraform,terraform_plan'
+  skip_check:
+    description: 'Checks to skip (comma-separated)'
+    required: false
+    default: ''
+  check:
+    description: 'Specific checks to run (comma-separated)'
+    required: false
+    default: ''
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.path }}
+    - ${{ inputs.framework }}
+    - ${{ inputs.skip_check }}
+    - ${{ inputs.check }}
