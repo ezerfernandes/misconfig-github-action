@@ -9,10 +9,11 @@ LABEL "repository"="https://github.com/ezerfernandes/misconfig-github-action"
 LABEL "homepage"="https://github.com/ezerfernandes/misconfig-github-action"
 LABEL "maintainer"="Ezer Silva <ezersilva@gmail.com>"
 
-RUN pip install checkov
-
 COPY ./src/entrypoint.sh /entrypoint.sh
 COPY ./src/process_results.py /process_results.py
+COPY ./requirements.txt /requirements.txt
+
+RUN pip install -r /requirements.txt
 
 RUN chmod +x /entrypoint.sh
 

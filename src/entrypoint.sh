@@ -3,9 +3,9 @@ set -e
 
 # region Get inputs with defaults
 PATH_TO_SCAN="${1:-.}"
-FRAMEWORKS="${2:-terraform}"
-SKIP_CHECKS="${3:-''}"
-CHECKS="${4:-''}"
+FRAMEWORKS="${2:-terraform,terraform_plan}"
+SKIP_CHECKS="${3:-}"
+CHECKS="${4:-}"
 # endregion
 
 echo "Starting misconfiguration scan..."
@@ -52,7 +52,7 @@ if [ ! -s checkov_output.json ]; then
 fi
 
 echo "Processing results..."
-python /process_results.py
+python ./process_results.py
 
 # Print summary of findings
 echo "Scan complete. See annotations in PR for details."

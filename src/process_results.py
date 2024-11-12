@@ -2,13 +2,14 @@ import json
 import os
 import sys
 
+
 def create_annotation(file_path, line_number, message, level="error"):
     """Create a GitHub annotation with the given parameters."""
     print(f"::{level} file={file_path},line={line_number}::{message}")
 
+
 def process_checkov_results(results_file):
     print(f"Processing Checkov results from {results_file}")
-
     try:
         with open(results_file, 'r') as f:
             results = json.load(f)
@@ -25,7 +26,12 @@ def process_checkov_results(results_file):
         print(f"Error reading results file: {e}")
         sys.exit(1)
 
-    failed_checks = results.get('results', {}).get('failed_checks', [])
+    if isinstance(results, dict):
+        results = [results]
+
+    failed_checks = []
+    for result in results:
+        failed_checks.extend(result.get('results', {}).get('failed_checks', []))
     print(f"Found {len(failed_checks)} failed checks")
 
     # Process failed checks
