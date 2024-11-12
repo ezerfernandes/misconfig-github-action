@@ -90,8 +90,8 @@ def process_checkov_results(results_file):
             end_line=end_line,
             title=f"{failure.get('resource', '')}: {failure.get('check_name', '')}",
             message=(
-                f"Guideline: <a href='{failure.get('guideline', '')}'>"
-                "Click here</a> to know more."
+                f"Tool: {failure.get('tool', '')} - "
+                f"Guideline: {failure.get('guideline', '')}"
             ),
         )
 
