@@ -2,7 +2,7 @@ import json
 import os
 import sys
 from typing import TypedDict
-from github import Github, Auth
+from github import Auth
 
 
 class Failure(TypedDict):
@@ -27,10 +27,15 @@ if not GITHUB_TOKEN:
     msg = "github_token must be set"
     raise ValueError(msg)
 auth = Auth.Token(GITHUB_TOKEN)
-#g = Github(auth=auth, base_url=f"https://{GITHUB_HOSTNAME}/api/v3")
 
-
-def create_annotation(file_path, start_line, end_line, title, message, level="warning",):
+def create_annotation(
+    file_path: str,
+    start_line: int,
+    end_line: int,
+    title: str,
+    message: str,
+    level: str = "warning",
+):
     """Create a GitHub annotation with the given parameters."""
     print(
         f"::{level} file={file_path},"
@@ -84,7 +89,11 @@ def process_checkov_results(results_file):
             start_line=start_line,
             end_line=end_line,
             title=failure.get('check_name', ''),
-            message=f"{failure.get('guideline', '')}",
+            message=(
+                f"Resource: <strong>{failure.get('resource', '')}</strong>\n"
+                f"Guideline: <a href='{failure.get('guideline', '')}'>"
+                "Click here</a> to know more.\n"
+            ),
         )
 
         # Also print to console for visibility
