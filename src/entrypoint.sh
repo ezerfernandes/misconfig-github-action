@@ -60,7 +60,7 @@ if [ ! -s tfsec_output.json ]; then
 fi
 
 echo "Processing results..."
-python process_results.py
+python /process_results.py
 
 # Print summary of findings
 echo "Scan complete. See annotations in PR code for details."
