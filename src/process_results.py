@@ -28,6 +28,7 @@ if not GITHUB_TOKEN:
     raise ValueError(msg)
 auth = Auth.Token(GITHUB_TOKEN)
 
+
 def create_annotation(
     file_path: str,
     start_line: int,
@@ -43,29 +44,13 @@ def create_annotation(
     )
 
 
-def process_checkov_results(results_file):
-    print(f"Processing Checkov results from {results_file}")
-    print(f"Using GitHub host: {GITHUB_HOSTNAME}")
-    try:
-        with open(results_file, 'r') as f:
-            results = json.load(f)
-    except FileNotFoundError:
-        print(f"Error: Results file '{results_file}' not found")
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in results file: {e}")
-        with open(results_file, 'r') as f:
-            print("File contents:")
-            print(f.read())
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error reading results file: {e}")
-        sys.exit(1)
-
-    if isinstance(results, dict):
-        results = [results]
-
-    failures: list[Failure] = [
+def process_checkov_results(checkov_filename, tfsec_filename):
+    # region Checkov findings
+    print(f"Processing checkov findings.")
+    checkov_results = _read_results_file(checkov_filename)
+    if isinstance(checkov_results, dict):
+        checkov_results = [checkov_results]
+    checkov_failures: list[Failure] = [
         {
             'check_name': c.get('check_name'),
             'guideline': c.get('guideline'),
@@ -76,9 +61,31 @@ def process_checkov_results(results_file):
             'end_line': c.get('file_line_range')[1],
             'tool': 'checkov',
         }
-        for framework in results
+        for framework in checkov_results
         for c in framework.get('results', {}).get('failed_checks', [])
     ]
+    # endregion
+
+    # region tfsec findings
+    print(f"Processing tfsec findings.")
+    tfsec_results: dict = _read_results_file(tfsec_filename)
+    tfsec_failures: list[Failure] = [
+        {
+            'check_name': c.get('rule_description'),
+            'guideline': (
+                f"[{c.get('severity')}] "
+                f"{c.get('resolution')}: {c.get('links')[0]}"
+            ),
+            'resource': c.get('resource'),
+            'filepath': c.get('location', {}).get('filename', ''),
+            'code': '',
+            'start_line': c.get('location', {}).get('start_line', 1),
+            'end_line': c.get('location', {}).get('end_line', 1),
+            'tool': 'tfsec',
+        }
+        for c in tfsec_results.get("results", [])
+    ]
+    failures = checkov_failures + tfsec_failures
 
     for failure in failures:
         file_path = failure.get('filepath', '')
@@ -98,5 +105,27 @@ def process_checkov_results(results_file):
         # Also print to console for visibility
         print(f"Created annotation in {file_path}:{start_line}-{end_line}")
 
+def _read_results_file(filename: str):
+    try:
+        with open(filename, 'r') as f:
+            results = json.load(f)
+        return results
+    except FileNotFoundError:
+        print(f"Error: Results file '{filename}' not found")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in results file: {e}")
+        with open(filename, 'r') as f:
+            print("File contents:")
+            print(f.read())
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error reading results file: {e}")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    process_checkov_results('checkov_output.json')
+    process_checkov_results(
+        'checkov_output.json',
+        'tfsec_output.json',
+    )

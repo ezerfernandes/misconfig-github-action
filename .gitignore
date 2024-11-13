@@ -1,5 +1,5 @@
-checkov_output.json
-checkov_error.txt
+*_output.json
+*_error.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
